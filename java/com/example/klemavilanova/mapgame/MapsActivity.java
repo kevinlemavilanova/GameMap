@@ -1,6 +1,7 @@
 package com.example.klemavilanova.mapgame;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -29,23 +31,51 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "gpslog";
-    private LocationManager mLocMgr;
-    private TextView textViewGPS, textViewDist;
-    private GoogleMap mMap;
-
-    public Intent intento;
-
-    private LatLngBounds VIGO = new LatLngBounds(new LatLng(42.236873, -8.717089), new LatLng(42.237139, -8.710813));
-
-    // coordenadas del tesoro
-    private LatLng tesoro;
-    private Location tesoroLoc;
-    private double lat=42.236026, lng=-8.712278;
-
+    private final static int codigo = 0;
     //Minimo tiempo para updates en Milisegundos
     private static final long MIN_CAMBIO_DISTANCIA_PARA_UPDATES = (long) 10;
     //Minimo tiempo para updates en Milisegundos
     private static final long MIN_TIEMPO_ENTRE_UPDATES = 5000;
+    public Intent intento;
+    private LocationManager mLocMgr;
+    private TextView textViewGPS, textViewDist;
+    private GoogleMap mMap;
+    private LatLngBounds VIGO = new LatLngBounds(new LatLng(42.236873, -8.717089), new LatLng(42.237139, -8.710813));
+    // coordenadas del tesoro
+    private LatLng tesoro;
+    private Location tesoroLoc;
+    // recibe notificaciones del LocationManager
+    public LocationListener locListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            Log.i(TAG, "Lat " + location.getLatitude() + " Long " + location.getLongitude());
+            textViewGPS.setText("Lat " + (float) location.getLatitude() + " Long " + (float) location.getLongitude());
+
+            // movemos la camara para la nueva posicion
+            LatLng nuevaPosicion = new LatLng(location.getLatitude(), location.getLongitude());
+            CameraPosition cameraPosition = CameraPosition.builder()
+                    .target(nuevaPosicion)
+                    .zoom(20)
+                    .build();
+
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+            //calculamos la distancia a la marca
+            textViewDist.setText(String.valueOf((int) location.distanceTo(tesoroLoc)) + "m");
+        }
+
+        public void onProviderDisabled(String provider) {
+            Log.i(TAG, "onProviderDisabled()");
+        }
+
+        public void onProviderEnabled(String provider) {
+            Log.i(TAG, "onProviderEnabled()");
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            Log.i(TAG, "onStatusChanged()");
+        }
+    };
+    private double lat = 42.236026, lng = -8.712278;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +88,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        intento = new Intent(MapsActivity.this,QRactivity.class);
+        intento = new Intent(MapsActivity.this, QRactivity.class);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -85,44 +115,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         textViewGPS.setText("Lat " + " Long ");
         // creamos objetos para determinar el tesoro
-        tesoro = new LatLng(lat,lng);
+        tesoro = new LatLng(lat, lng);
         tesoroLoc = new Location(LocationManager.GPS_PROVIDER);
         tesoroLoc.setLatitude(lat);
         tesoroLoc.setLongitude(lng);
 
     }
-
-    // recibe notificaciones del LocationManager
-    public LocationListener locListener = new LocationListener() {
-        public void onLocationChanged(Location location) {
-            Log.i(TAG, "Lat " + location.getLatitude() + " Long " + location.getLongitude());
-            textViewGPS.setText("Lat " + (float)location.getLatitude() + " Long " + (float)location.getLongitude());
-
-            // movemos la camara para la nueva posicion
-            LatLng nuevaPosicion = new LatLng(location.getLatitude(),location.getLongitude());
-            CameraPosition cameraPosition = CameraPosition.builder()
-                    .target(nuevaPosicion)
-                    .zoom(20)
-                    .build();
-
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-            //calculamos la distancia a la marca
-            textViewDist.setText(String.valueOf((int)location.distanceTo(tesoroLoc))+"m");
-        }
-
-        public void onProviderDisabled(String provider) {
-            Log.i(TAG, "onProviderDisabled()");
-        }
-
-        public void onProviderEnabled(String provider) {
-            Log.i(TAG, "onProviderEnabled()");
-        }
-
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            Log.i(TAG, "onStatusChanged()");
-        }
-    };
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -146,5 +144,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLng(tesoro));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(VIGO.getCenter(), 10));
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == codigo) {
+                String text = data.getExtras().getString("retorno");
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
+        }
     }
 }
