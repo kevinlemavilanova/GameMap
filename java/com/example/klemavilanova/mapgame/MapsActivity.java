@@ -40,12 +40,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // coordenadas del tesoro
     private LatLng tesoro;
     private Location tesoroLoc;
-    private double lat=42.263044, lng=-8.802236;
+    private double lat=42.236026, lng=-8.712278;
 
     //Minimo tiempo para updates en Milisegundos
-    private static final long MIN_CAMBIO_DISTANCIA_PARA_UPDATES = (long) 20; // 20 metro
+    private static final long MIN_CAMBIO_DISTANCIA_PARA_UPDATES = (long) 10;
     //Minimo tiempo para updates en Milisegundos
-    private static final long MIN_TIEMPO_ENTRE_UPDATES = 10000; // 10 sg
+    private static final long MIN_TIEMPO_ENTRE_UPDATES = 5000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,13 +102,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             LatLng nuevaPosicion = new LatLng(location.getLatitude(),location.getLongitude());
             CameraPosition cameraPosition = CameraPosition.builder()
                     .target(nuevaPosicion)
-                    .zoom(15)
+                    .zoom(20)
                     .build();
 
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
             //calculamos la distancia a la marca
-            textViewDist.setText(String.valueOf(location.distanceTo(tesoroLoc)));
+            textViewDist.setText(String.valueOf((int)location.distanceTo(tesoroLoc))+"m");
         }
 
         public void onProviderDisabled(String provider) {
@@ -143,7 +143,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMyLocationEnabled(true);
 
         // Engadimos tesoro
-        mMap.addMarker(new MarkerOptions().position(tesoro).title("Marca de Tesoro"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(tesoro));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(VIGO.getCenter(), 10));
 
