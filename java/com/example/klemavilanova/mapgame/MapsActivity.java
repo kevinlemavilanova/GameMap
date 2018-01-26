@@ -15,6 +15,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +40,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public Intent intento;
     private LocationManager mLocMgr;
     private TextView textViewGPS, textViewDist;
+    private ImageView ImgTesoro;
     private GoogleMap mMap;
     private LatLngBounds VIGO = new LatLngBounds(new LatLng(42.236873, -8.717089), new LatLng(42.237139, -8.710813));
     // coordenadas del tesoro
@@ -83,7 +85,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_location);
         textViewGPS = (TextView) findViewById(R.id.lat);
         textViewDist = (TextView) findViewById(R.id.dist);
-
+        ImgTesoro = (ImageView) findViewById(R.id.star);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -94,9 +96,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
                 startActivity(intento);
             }
         });
@@ -140,16 +139,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mMap.setMyLocationEnabled(true);
 
-        // Engadimos tesoro
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(tesoro));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(VIGO.getCenter(), 10));
+        // Zoom en coordenadas de vigo para no ampliar desd el mapa completo
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(VIGO.getCenter(), 15));
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
+        int duration = Toast.LENGTH_LONG;
 
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
@@ -157,6 +155,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String text = data.getExtras().getString("retorno");
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
+                if (text.equals("Tesoro de las Torres")){
+                    ImgTesoro.setVisibility(View.VISIBLE);
+                }
             }
         }
     }

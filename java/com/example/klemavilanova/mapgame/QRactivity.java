@@ -78,12 +78,10 @@ public class QRactivity extends AppCompatActivity implements ZXingScannerView.Re
         Intent intento= new Intent();
         if (rawResult.getText().equals("Tesoro de las Torres")) {
             intento.putExtra("retorno", rawResult.getText() );
-            setResult(RESULT_OK, intento);
-            finish();
         } else {
             intento.putExtra("retorno", "Este no es QR del tesoro" );
-            setResult(RESULT_OK, intento);
-            finish();
         }
+        setResult(RESULT_OK, intento);
+        finish();
     }
 }
