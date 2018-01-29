@@ -63,6 +63,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             //calculamos la distancia a la marca
             textViewDist.setText(String.valueOf((int) location.distanceTo(tesoroLoc)) + "m");
+
+            int distancia = (int) location.distanceTo(tesoroLoc);
+
+            if (distancia <= 20) {
+                mMap.addMarker(new MarkerOptions().position(tesoro));
+            }
         }
 
         public void onProviderDisabled(String provider) {
@@ -147,7 +153,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Context context = getApplicationContext();
-        int duration = Toast.LENGTH_LONG;
+        int duration = Toast.LENGTH_SHORT;
 
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
@@ -155,9 +161,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String text = data.getExtras().getString("retorno");
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
-                if (text.equals("Tesoro de las Torres")){
-                    ImgTesoro.setVisibility(View.VISIBLE);
-                }
             }
         }
     }
